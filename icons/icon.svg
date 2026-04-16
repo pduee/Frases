@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fondo -->
+  <rect width="512" height="512" fill="#0d0d0b"/>
+  <!-- Anillo exterior -->
+  <circle cx="256" cy="256" r="220" fill="none" stroke="#7a6335" stroke-width="1.5" opacity="0.5"/>
+  <!-- Anillo medio -->
+  <circle cx="256" cy="256" r="172" fill="none" stroke="#7a6335" stroke-width="1" opacity="0.35"/>
+  <!-- Núcleo -->
+  <circle cx="256" cy="256" r="128" fill="#1a1208"/>
+  <circle cx="256" cy="256" r="128" fill="none" stroke="#c4a35a" stroke-width="1.5" opacity="0.7"/>
+  <!-- Punto central con círculo -->
+  <circle cx="256" cy="256" r="48" fill="#0f0c06" stroke="#c4a35a" stroke-width="1.2" opacity="0.9"/>
+  <circle cx="256" cy="256" r="12" fill="#c4a35a" opacity="0.85"/>
+  <!-- Cruz de navegación muy sutil -->
+  <line x1="256" y1="190" x2="256" y2="218" stroke="#c4a35a" stroke-width="1" opacity="0.3"/>
+  <line x1="256" y1="294" x2="256" y2="322" stroke="#c4a35a" stroke-width="1" opacity="0.3"/>
+  <line x1="190" y1="256" x2="218" y2="256" stroke="#c4a35a" stroke-width="1" opacity="0.3"/>
+  <line x1="294" y1="256" x2="322" y2="256" stroke="#c4a35a" stroke-width="1" opacity="0.3"/>
+</svg>

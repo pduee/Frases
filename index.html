@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0d0b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Oráculo">
+  <meta name="description" content="Sabiduría de los grandes consejeros de la historia">
+  <title>Oráculo</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/icon.svg">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ── HEADER FIJO ─────────────────────────────── -->
+  <header id="app-header">
+    <div class="header-inner">
+      <span class="header-title">Tus frases</span>
+      <span class="header-count" id="header-count">0</span>
+    </div>
+  </header>
+
+  <!-- ── ANIMACIÓN VOLADORA ──────────────────────── -->
+  <div id="flying-phrase" aria-hidden="true"></div>
+
+  <!-- ── CONTENEDOR PRINCIPAL CON SCROLL SNAP ───── -->
+  <div id="scroll-container">
+
+    <!-- PANTALLA 3: Historial (arriba en el DOM = desliza abajo) -->
+    <section class="screen" id="screen-history" aria-label="Historial de frases">
+      <div class="history-inner">
+        <div class="history-list" id="history-list">
+          <div class="history-empty" id="history-empty">
+            <div class="empty-glyph">◎</div>
+            <p>Ninguna frase guardada aún.</p>
+            <p class="empty-sub">Las frases que guardes aparecerán aquí.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANTALLA 1: Frase del día (posición central inicial) -->
+    <section class="screen" id="screen-daily" aria-label="Frase del día">
+
+      <!-- Contenido de la frase -->
+      <div class="quote-scroll-area" id="quote-scroll-area">
+        <div class="quote-container" id="quote-container">
+
+          <!-- Respuesta del oráculo (aparece primero) -->
+          <div class="oracle-card hidden" id="oracle-card">
+            <div class="oracle-card-header">
+              <span class="oracle-label">El oráculo responde</span>
+            </div>
+            <div class="advisor-name" id="resp-advisor"></div>
+            <div class="advisor-presentation" id="resp-presentation"></div>
+            <blockquote class="quote-text" id="resp-quote-original"></blockquote>
+            <p class="quote-translation" id="resp-quote-translation"></p>
+          </div>
+
+          <!-- Separador entre oráculo y frase del día -->
+          <div class="quote-divider hidden" id="quote-divider"></div>
+
+          <!-- Frase del día -->
+          <div class="daily-card" id="daily-card">
+            <div class="daily-label" id="daily-label">Frase del día</div>
+            <div class="quote-source" id="daily-source"></div>
+            <blockquote class="quote-text" id="daily-original"></blockquote>
+            <p class="quote-translation" id="daily-translation"></p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="quote-actions">
+        <button class="action-btn dismiss-btn" id="btn-dismiss" aria-label="Descartar frase">
+          <span class="btn-icon">✕</span>
+        </button>
+        <button class="action-btn save-btn" id="btn-save" aria-label="Guardar frase">
+          <span class="btn-icon">♡</span>
+        </button>
+      </div>
+
+      <!-- Indicadores de navegación -->
+      <div class="nav-hint nav-hint-top" aria-hidden="true">
+        <span class="nav-arrow">↑</span>
+        <span class="nav-label">Consulta</span>
+      </div>
+      <div class="nav-hint nav-hint-bottom" aria-hidden="true">
+        <span class="nav-label">Historial</span>
+        <span class="nav-arrow">↓</span>
+      </div>
+
+    </section>
+
+    <!-- PANTALLA 2: Consulta (abajo en el DOM = desliza arriba) -->
+    <section class="screen" id="screen-consult" aria-label="Consultar al oráculo">
+      <div class="consult-inner">
+
+        <!-- Estado: reposo -->
+        <div class="consult-idle" id="consult-idle">
+          <p class="consult-eyebrow">Oráculo</p>
+          <p class="consult-tagline">¿Qué sientes ahora mismo?</p>
+          <div class="orb-wrapper" id="oracle-orb" role="button" tabindex="0" aria-label="Consultar al oráculo">
+            <div class="orb-ring" style="--d:140px;--op:0.25;--delay:0s"></div>
+            <div class="orb-ring" style="--d:108px;--op:0.45;--delay:0.4s"></div>
+            <div class="orb-ring" style="--d:78px;--op:0.65;--delay:0.8s"></div>
+            <div class="orb-core">
+              <span class="orb-glyph">◉</span>
+            </div>
+          </div>
+          <p class="consult-sub">Pulsa para invocar</p>
+        </div>
+
+        <!-- Estado: input -->
+        <div class="consult-form hidden" id="consult-form">
+          <p class="form-title">Describe tu estado</p>
+          <textarea
+            id="feeling-input"
+            placeholder="Estoy atravesando…"
+            rows="4"
+            maxlength="600"
+            aria-label="Describe cómo te sientes"
+          ></textarea>
+          <div class="form-actions">
+            <button class="btn-cancel" id="btn-cancel-consult">Cancelar</button>
+            <button class="btn-invoke" id="btn-submit-consult">Consultar</button>
+          </div>
+        </div>
+
+        <!-- Estado: cargando -->
+        <div class="consult-loading hidden" id="consult-loading">
+          <div class="loading-ring-wrap">
+            <div class="loading-ring"></div>
+            <span class="loading-glyph">◉</span>
+          </div>
+          <p class="loading-text">El oráculo consulta…</p>
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- /scroll-container -->
+
+  <!-- ── TOAST ───────────────────────────────────── -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
