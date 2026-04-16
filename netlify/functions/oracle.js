@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════
    Netlify Function: oracle
-   Proxy seguro para la API de Anthropic.
-   Variable de entorno requerida: ANTHROPIC_API_KEY
+   Proxy seguro para la API de Google Gemini.
+   Variable de entorno requerida: GEMINI_API_KEY
 ═══════════════════════════════════════════════════ */
 
 'use strict';
@@ -43,26 +43,24 @@ Responde con este JSON exacto (sin nada más):
 }`;
 }
 
-// ── Llamada a la API de Anthropic ────────────────
+// ── Llamada a la API de Gemini ───────────────────
 
-function callAnthropic(feeling) {
+function callGemini(feeling) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify({
-      model:      'claude-sonnet-4-20250514',
-      max_tokens: 600,
-      system:     SYSTEM,
-      messages:   [{ role: 'user', content: userPrompt(feeling) }],
+      systemInstruction: { parts: [{ text: SYSTEM }] },
+      contents: [{ role: 'user', parts: [{ text: userPrompt(feeling) }] }],
+      generationConfig: { maxOutputTokens: 600 },
     });
 
+    const apiKey = process.env.GEMINI_API_KEY;
     const options = {
-      hostname: 'api.anthropic.com',
-      path:     '/v1/messages',
+      hostname: 'generativelanguage.googleapis.com',
+      path:     `/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       method:   'POST',
       headers: {
-        'Content-Type':      'application/json',
-        'x-api-key':         process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'Content-Length':    Buffer.byteLength(payload),
+        'Content-Type':   'application/json',
+        'Content-Length': Buffer.byteLength(payload),
       },
     };
 
@@ -73,12 +71,10 @@ function callAnthropic(feeling) {
         try {
           const body = JSON.parse(raw);
           if (body.error) {
-            reject(new Error(body.error.message || 'Anthropic error'));
+            reject(new Error(body.error.message || 'Gemini error'));
             return;
           }
-          // El modelo devuelve JSON como texto
-          const text = body.content?.[0]?.text || '{}';
-          // Extraer JSON incluso si viene con saltos de línea extra
+          const text = body.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
           const match = text.match(/\{[\s\S]*\}/);
           if (!match) { reject(new Error('No JSON in response')); return; }
           resolve(JSON.parse(match[0]));
@@ -112,8 +108,8 @@ exports.handler = async (event) => {
     return { statusCode: 405, headers: cors, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error('[oracle] ANTHROPIC_API_KEY not set');
+  if (!process.env.GEMINI_API_KEY) {
+    console.error('[oracle] GEMINI_API_KEY not set');
     return {
       statusCode: 500,
       headers: cors,
@@ -137,7 +133,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const result = await callAnthropic(feeling.trim().slice(0, 600));
+    const result = await callGemini(feeling.trim().slice(0, 600));
     return { statusCode: 200, headers: cors, body: JSON.stringify(result) };
   } catch (err) {
     console.error('[oracle] Error:', err.message);
